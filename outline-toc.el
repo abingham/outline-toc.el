@@ -377,12 +377,30 @@ When FORCE, enforce update of the active region."
   (interactive)
   ;; If we are in the minibuffer, do nothing.
   (unless (active-minibuffer-window)
-    (if (outline-toc-active-current-buffer-p)
-        ;; We are still in the same buffer, so just update the outline-toc.
-        (let ((win (outline-toc--get-window)))
+    (when (outline-toc-active-current-buffer-p)
+        ;; Recreate toc window if necessary
+        (when (null (outline-toc--get-window))
+          (outline-toc-create-window))
+
+        ;; Update our position in the TOC window
+        (let ((win (outline-toc--get-window))
+              (pt (point)))
           (with-selected-window win
             (outline-show-all)
+            (goto-char pt)
+            (outline-previous-heading)
             (outline-hide-body)))
+
+        ;; (let ((pt (point)))
+        ;;   (with-current-buffer outline-toc--buffer-name
+        ;;     (let ((buffer-read-only 0))
+        ;;       (message "%s" pt)
+        ;;       (outline-show-all)
+        ;;       (goto-char pt)
+        ;;       (message "%s %s %s" pt (point) (current-buffer)))
+        ;;     ;;(outline-previous-heading)
+        ;;     ;;(outline-hide-body)
+        ;;     )
         ;; (let ((win (outline-toc--get-window))
         ;;       (start (window-start))
         ;;       (end (window-end))
@@ -450,7 +468,7 @@ When FORCE, enforce update of the active region."
     ;;   ;;                                  (outline-toc--get-window))
     ;;   ;;                         (delete-window (outline-toc--get-window)))))))
     ;;   )
-    )))
+          )))
 
 ;;; Overlay movement
 
