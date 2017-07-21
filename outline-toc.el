@@ -66,6 +66,11 @@ recreate the outline-toc to avoid problems with recentering."
 By default, this is only a different background color."
   :group 'outline-toc)
 
+(defface outline-toc-current-section
+  '((t (:background "yellow" :foreground "black")))
+  "Face for the current line in the TOC."
+  :group 'outline-toc)
+
 (defcustom outline-toc-width-fraction 0.15
   "Fraction of width which should be used for outline-toc sidebar."
   :type 'number
@@ -393,7 +398,7 @@ When FORCE, enforce update of the active region."
 
             (unless outline-toc--line-overlay
               (setq outline-toc--line-overlay (make-overlay (point) (1+ (point)) nil t))
-              (overlay-put outline-toc--line-overlay 'face '(:background "yellow" :foreground "black"))
+              (overlay-put outline-toc--line-overlay 'face 'outline-toc-current-section)
               (overlay-put outline-toc--line-overlay 'priority 6))
             (move-overlay outline-toc--line-overlay (point) (line-beginning-position 2))))
 
