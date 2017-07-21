@@ -389,7 +389,13 @@ When FORCE, enforce update of the active region."
             (outline-show-all)
             (goto-char pt)
             (outline-previous-heading)
-            (outline-hide-body)))
+            (outline-hide-body)
+
+            (unless outline-toc--line-overlay
+              (setq outline-toc--line-overlay (make-overlay (point) (1+ (point)) nil t))
+              (overlay-put outline-toc--line-overlay 'face '(:background "yellow" :foreground "black"))
+              (overlay-put outline-toc--line-overlay 'priority 6))
+            (move-overlay outline-toc--line-overlay (point) (line-beginning-position 2))))
 
         ;; (let ((pt (point)))
         ;;   (with-current-buffer outline-toc--buffer-name
