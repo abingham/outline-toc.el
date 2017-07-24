@@ -59,13 +59,6 @@ TrueType font for this.  After changing this, you should
 recreate the outline-toc to avoid problems with recentering."
   :group 'outline-toc)
 
-(defface outline-toc-active-region-background
-  '((((background dark)) (:background "#700000"))
-    (t (:background "#C847D8FEFFFF")))
-  "Face for the active region in the outline-toc.
-By default, this is only a different background color."
-  :group 'outline-toc)
-
 (defface outline-toc-current-section
   '((t (:background "yellow" :foreground "black")))
   "Face for the current line in the TOC."
@@ -170,7 +163,7 @@ bottom or top."
 ;;   :group 'outline-toc)
 
 ;; TODO: How do we specify "for all outline-mode" docs? Outline-mode is minor, I think...
-(defcustom outline-toc-major-modes '(markdown-mode org-mode)
+(defcustom outline-toc-major-modes '(markdown-mode org-mode outline-mode rst-mode)
   "Major modes for which a outline-toc should be created.
 This can also be a parent mode like 'prog-mode.
 If nil, a outline-toc must be explicitly created for each buffer."
@@ -395,6 +388,7 @@ When FORCE, enforce update of the active region."
             (goto-char pt)
             (outline-previous-heading)
             (outline-hide-body)
+            (recenter)
 
             (unless outline-toc--line-overlay
               (setq outline-toc--line-overlay (make-overlay (point) (1+ (point)) nil t))
