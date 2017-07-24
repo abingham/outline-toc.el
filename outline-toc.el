@@ -102,31 +102,6 @@ this will slow down scrolling."
                   outline-toc--update-delay t 'outline-toc--update))))
   :group 'outline-toc)
 
-(defcustom outline-toc-always-recenter nil
-  "Whether outline-toc sidebar should be recentered after every point movement."
-  :type 'boolean
-  :group 'outline-toc)
-
-(defcustom outline-toc-recenter-type 'relative
-  "Specifies the type of recentering the outline-toc should use.
-The outline-toc can use different types of recentering, i.e., how the
-outline-toc should behave when you scroll in the main window or when
-you drag the active region with the mouse.  The following
-explanations will probably not help much, so simply try them and
-choose the one which suits you best.
-`relative' -- The position of the active region in the outline-toc
-corresponds with the relative position of this region in the
-buffer.  This the default.
-`middle' -- The active region will stay fixed in the middle of
-the outline-toc.
-`free' -- The position will be more or less free.  When dragging
-the active region, the outline-toc will scroll when you reach the
-bottom or top."
-  :type '(choice (const :tag "Relative" relative)
-                 (const :tag "Middle" middle)
-                 (const :tag "Free" free))
-  :group 'outline-toc)
-
 (defcustom outline-toc-hide-scroll-bar t
   "Whether the outline-toc should hide the vertical scrollbar."
   :type 'boolean
@@ -141,26 +116,6 @@ bottom or top."
   "Whether the outline-toc should create a dedicated window."
   :type 'boolean
   :group 'outline-toc)
-
-;; (defcustom outline-toc-normal-height-faces '(font-lock-function-name-face)
-;;   "List of faces which should be displayed with normal height.
-;; When `outline-toc-enlarge-certain-faces' is non-nil, all faces in
-;; this list will be displayed using the default font height.  By
-;; default, this list contains `font-lock-function-name-face', so
-;; you can still read function names in the outline-toc."
-;;   :type '(repeat face)
-;;   :group 'outline-toc)
-
-;; (defcustom outline-toc-sync-overlay-properties '(face invisible)
-;;   "Specifies which overlay properties should be synced.
-;; Unlike text properties, overlays are not applied automatically to
-;; the outline-toc and must be explicitly synced.  This variable
-;; specifies which overlay properties should be synced by
-;; `outline-toc-sync-overlays'.  Most importantly, this variable should
-;; include 'invisible', so that hidden text does not appear in the
-;; outline-toc buffer."
-;;   :type '(repeat symbol)
-;;   :group 'outline-toc)
 
 ;; TODO: How do we specify "for all outline-mode" docs? Outline-mode is minor, I think...
 (defcustom outline-toc-major-modes '(markdown-mode org-mode outline-mode rst-mode)
@@ -261,21 +216,6 @@ when you enter a buffer which is not derived from
         (selected-window)
       (other-window 1))))
 
-(defun outline-toc-setup-hooks (&optional remove)
-  "Hook outline-toc into other modes.
-If REMOVE is non-nil, remove outline-toc from other modes."
-  ;; (if remove
-  ;;     (progn
-  ;;       (remove-hook 'outline-view-change-hook 'outline-toc-sync-overlays)
-  ;;       (remove-hook 'hs-hide-hook 'outline-toc-sync-overlays)
-  ;;       (remove-hook 'hs-show-hook 'outline-toc-sync-overlays))
-  ;;   ;; outline-(minor-)mode
-  ;;   (add-hook 'outline-view-change-hook 'outline-toc-sync-overlays)
-  ;;   ;; hideshow
-  ;;   (add-hook 'hs-hide-hook 'outline-toc-sync-overlays)
-  ;;   (add-hook 'hs-show-hook 'outline-toc-sync-overlays))
-  )
-
 ;;; Outline-Toc creation / killing
 
 ;;;###autoload
@@ -294,9 +234,7 @@ If REMOVE is non-nil, remove outline-toc from other modes."
           (outline-toc-new-outline-toc))
         ;; Create timer.
         (setq outline-toc--timer-object
-              (run-with-idle-timer outline-toc--update-delay t 'outline-toc--update))
-        ;; Hook into other modes.
-        (outline-toc-setup-hooks))
+              (run-with-idle-timer outline-toc--update-delay t 'outline-toc--update)))
     ;; Turn it off
     (outline-toc-kill)
     (outline-toc-setup-hooks t)))
@@ -394,145 +332,7 @@ When FORCE, enforce update of the active region."
               (setq outline-toc--line-overlay (make-overlay (point) (1+ (point)) nil t))
               (overlay-put outline-toc--line-overlay 'face 'outline-toc-current-section)
               (overlay-put outline-toc--line-overlay 'priority 6))
-            (move-overlay outline-toc--line-overlay (point) (line-beginning-position 2))))
-
-        ;; (let ((pt (point)))
-        ;;   (with-current-buffer outline-toc--buffer-name
-        ;;     (let ((buffer-read-only 0))
-        ;;       (message "%s" pt)
-        ;;       (outline-show-all)
-        ;;       (goto-char pt)
-        ;;       (message "%s %s %s" pt (point) (current-buffer)))
-        ;;     ;;(outline-previous-heading)
-        ;;     ;;(outline-hide-body)
-        ;;     )
-        ;; (let ((win (outline-toc--get-window))
-        ;;       (start (window-start))
-        ;;       (end (window-end))
-        ;;       (pt (point)))
-        ;;   (when (and (null win)
-        ;;              outline-toc-recreate-window)
-        ;;     ;; The outline-toc window is no longer visible, so create it again...
-        ;;     (setq win (outline-toc-create-window))
-        ;;     ;; ...and switch to existing outline-toc buffer.
-        ;;     (with-selected-window win
-        ;;       (when (window-dedicated-p)
-        ;;         (set-window-dedicated-p nil nil))
-        ;;       (switch-to-buffer outline-toc--buffer-name t t)
-        ;;       (when outline-toc-dedicated-window
-        ;;         (set-window-dedicated-p nil t))))
-        ;;   ;; (with-selected-window win
-        ;;   ;;   ;; Make sure the base overlay spans the whole buffer.
-        ;;   ;;   (unless (and (= (overlay-start outline-toc--base-overlay) (point-min))
-        ;;   ;;                (= (overlay-end outline-toc--base-overlay) (point-max)))
-        ;;   ;;     (move-overlay outline-toc--base-overlay (point-min) (point-max)))
-        ;;   ;;   (unless (and (not force)
-        ;;   ;;                (= outline-toc--start start)
-        ;;   ;;                (= outline-toc--end end))
-        ;;   ;;     ;; Update the overlay.
-        ;;   ;;     (setq outline-toc--start start
-        ;;   ;;           outline-toc--end end)
-        ;;   ;;     ;; (outline-toc-recenter (line-number-at-pos (/ (+ end start) 2))
-        ;;   ;;     ;;                       (/ (- (line-number-at-pos end)
-        ;;   ;;     ;;                             (line-number-at-pos start))
-        ;;   ;;     ;;                          2)))
-        ;;   ;;     (goto-char pt)
-        ;;   ;;     (beginning-of-line)
-        ;;   ;;     (unless outline-toc--line-overlay
-        ;;   ;;       (setq outline-toc--line-overlay (make-overlay (point) (1+ (point)) nil t))
-        ;;   ;;       (overlay-put outline-toc--line-overlay 'face '(:background "yellow" :foreground "yellow"))
-        ;;   ;;       (overlay-put outline-toc--line-overlay 'priority 6))
-        ;;   ;;     (move-overlay outline-toc--line-overlay (point) (line-beginning-position 2))
-        ;;   ;;     (when outline-toc-always-recenter
-        ;;   ;;       (recenter (round (/ (window-height) 2)))))
-        ;;   ;;   (outline-hide-body)
-        ;;   ;;   ;; Redisplay
-        ;;   ;;   (sit-for 0))
-        ;;   )
-    ;;   ;; The buffer was switched, check if the outline-toc should switch, too.
-    ;;   ;; (if (and outline-toc-major-modes
-    ;;   ;;          (apply 'derived-mode-p outline-toc-major-modes))
-    ;;   ;;     (progn
-    ;;   ;;       ;; Create window if necessary...
-    ;;   ;;       (unless (outline-toc--get-window)
-    ;;   ;;         (outline-toc-create-window))
-    ;;   ;;       ;; ...and re-create outline-toc with new buffer...
-    ;;   ;;       (outline-toc-new-outline-toc)
-    ;;   ;;       ;; Redisplay
-    ;;   ;;       (sit-for 0)
-    ;;   ;;       ;; ...and call update again.
-    ;;   ;;       (outline-toc--update t))
-    ;;   ;;   ;; Otherwise, delete window if the user so wishes.
-    ;;   ;;   (when (and (outline-toc--get-window)
-    ;;   ;;              outline-toc-automatically-delete-window)
-    ;;   ;;     ;; We wait a tiny bit before deleting the window, since we
-    ;;   ;;     ;; might only be temporarily in another buffer.
-    ;;   ;;     (run-with-timer 0.3 nil
-    ;;   ;;                     (lambda ()
-    ;;   ;;                       (when (and (null (outline-toc-active-current-buffer-p))
-    ;;   ;;                                  (outline-toc--get-window))
-    ;;   ;;                         (delete-window (outline-toc--get-window)))))))
-    ;;   )
-          )))
-
-;;; Overlay movement
-
-;; (defun outline-toc-move-overlay-mouse (start-event)
-;;   "Move overlay by tracking mouse movement."
-;;   (interactive "e")
-;;   (mouse-set-point start-event)
-;;   (when (get-buffer-window (buffer-base-buffer (current-buffer)))
-;;     (let* ((echo-keystrokes 0)
-;;            (end-posn (event-end start-event))
-;;            (start-point (posn-point end-posn))
-;;            (make-cursor-line-fully-visible nil)
-;;            (cursor-type nil)
-;;            (outline-toc-automatically-delete-window nil)
-;;            (pcselmode (when (boundp 'pc-selection-mode)
-;;                         pc-selection-mode))
-;;            pt ev)
-;;       (when (and pcselmode (fboundp 'pc-selection-mode))
-;;         (pc-selection-mode -1))
-;;       (track-mouse
-;;         (outline-toc-set-overlay start-point)
-;;         (while (and
-;;                 (consp (setq ev (read-event)))
-;;                 (eq (car ev) 'mouse-movement))
-;;           (setq pt (posn-point (event-start ev)))
-;;           (when (numberp pt)
-;;             (goto-char pt)
-;;             (beginning-of-line)
-;;             (outline-toc-set-overlay (point)))))
-;;       (select-window (get-buffer-window (buffer-base-buffer)))
-;;       (outline-toc--update)
-;;       (when (and pcselmode (fboundp 'pc-selection-mode))
-;;         (pc-selection-mode 1)))))
-
-;; (defun outline-toc-set-overlay (pt)
-;;   "Set overlay position, with PT being the middle."
-;;   (goto-char pt)
-;;   (let* ((ovstartline (line-number-at-pos outline-toc--start))
-;;          (ovendline (line-number-at-pos outline-toc--end))
-;;          (ovheight (round (/ (- ovendline ovstartline) 2)))
-;;          (line (line-number-at-pos))
-;;          (winstart (window-start))
-;;          (winend (window-end))
-;;          newstart newend)
-;;     (setq pt (point-at-bol))
-;;     (setq newstart (outline-toc--line-to-pos (- line ovheight)))
-;;     ;; Perform recentering
-;;     (outline-toc-recenter line ovheight)
-;;     ;; Set new position in main buffer and redisplay
-;;     (with-selected-window (get-buffer-window (buffer-base-buffer))
-;;       (goto-char pt)
-;;       (set-window-start nil newstart)
-;;       (redisplay t)
-;;       (setq newend (window-end)))
-;;     (when (eq outline-toc-recenter-type 'free)
-;;       (while (> newend winend)
-;;         (scroll-up 5)
-;;         (redisplay t)
-;;         (setq winend (window-end))))))
+            (move-overlay outline-toc--line-overlay (point) (line-beginning-position 2)))))))
 
 (defun outline-toc--line-to-pos (line)
   "Return point position of line number LINE."
@@ -543,83 +343,14 @@ When FORCE, enforce update of the active region."
       (forward-line (1- line)))
     (point)))
 
-;; (defun outline-toc-recenter (middle height)
-;;   "Recenter the outline-toc according to `outline-toc-recenter-type'.
-;; MIDDLE is the line number in the middle of the active region.
-;; HEIGHT is the number of lines from MIDDLE to begin/end of the
-;; active region."
-;;   (cond
-;;    ;; Relative recentering
-;;    ((eq outline-toc-recenter-type 'relative)
-;;     (let* ((maxlines (line-number-at-pos (point-max)))
-;;            percentage relpos newline start numlines)
-;;       (setq numlines (count-lines (window-start) (window-end)))
-;;       (setq percentage (/ (float middle) (float maxlines)))
-;;       (setq newline (ceiling (* percentage numlines)))
-;;       (setq start (outline-toc--line-to-pos
-;;                    (- middle height
-;;                       (floor (* percentage
-;;                                 (- numlines height height))))))
-;;       (or (> start (point-min))
-;;           (setq start (point-min)))
-;;       ;; If (point-max) already visible, don't go further
-;;       (if (and (> start (window-start))
-;;                (with-selected-window (get-buffer-window (buffer-base-buffer))
-;;                  (= (point-max) (window-end))))
-;;           (save-excursion
-;;             (goto-char (point-max))
-;;             (recenter -1))
-;;         (unless (and (> start (window-start))
-;;                      (= (point-max) (window-end)))
-;;           (set-window-start nil start)))))
-;;    ;; Middle recentering
-;;    ((eq outline-toc-recenter-type 'middle)
-;;     (let ((start (- middle height
-;;                     (floor (* 0.5
-;;                               (- outline-toc--numlines height height))))))
-;;       (set-window-start nil (outline-toc--line-to-pos start))))
-;;    ;; Free recentering
-;;    ((eq outline-toc-recenter-type 'free)
-;;     (let ((newstart (outline-toc--line-to-pos (- middle height)))
-;;           (winstart (window-start)))
-;;       (while (< newstart winstart)
-;;         (scroll-down 5)
-;;         (redisplay t)
-;;         (setq winstart (window-start)))))))
-
 ;;; Outline-Toc minor mode
 
 (defvar outline-toc-sb-mode-map (make-sparse-keymap)
   "Keymap used by `outline-toc-sb-mode'.")
 
-;; (define-key outline-toc-sb-mode-map [down-mouse-1] 'outline-toc-move-overlay-mouse)
-;; (define-key outline-toc-sb-mode-map [down-mouse-2] 'outline-toc-move-overlay-mouse)
-;; (define-key outline-toc-sb-mode-map [down-mouse-3] 'outline-toc-move-overlay-mouse)
-
 (define-minor-mode outline-toc-sb-mode
   "Minor mode for outline-toc sidebar."
   nil "outline-toc" outline-toc-sb-mode-map)
-
-;;; Sync outline-toc with modes which create/delete overlays.
-
-;; (defun outline-toc-sync-overlays ()
-;;   "Synchronize overlays between base and outline-toc buffer."
-;;   (interactive)
-;;   ;; Get overlays and Semantic status from base buffer.
-;;   (when (and outline-toc-mode
-;;              (outline-toc-active-current-buffer-p))
-;;     (with-current-buffer outline-toc--active-buffer
-;;       (let ((baseov (overlays-in (point-min) (point-max)))
-;;             ov props p)
-;;         ;; Apply overlays to outline-toc.
-;;         (with-current-buffer outline-toc--buffer-name
-;;           ;; Delete overlays (but keep our own).
-;;           (let ((ovs (overlays-in (point-min) (point-max))))
-;;             (dolist (ov ovs)
-;;               (unless (member ov (list outline-toc--base-overlay))
-;;                 (delete-overlay ov))))
-;;           ;; Re-apply font overlay
-;;           (move-overlay outline-toc--base-overlay (point-min) (point-max)))))))
 
 (provide 'outline-toc)
 
