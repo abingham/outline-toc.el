@@ -1,10 +1,11 @@
-;;; outline-toc.el --- Sidebar showing a "table of contents" for an outline-mode buffer
+;;; outline-toc.el --- Sidebar showing a "table of contents".
 
 ;; Copyright (C) 2017 Austin Bingham
 
 ;; Author: Austin Bingham <austin.bingham@gmail.com>
-;; Keywords: outline
-;; Version: 0.0
+;; Keywords: convenience outlines
+;; URL: https://github.com/abingham/outline-toc.el
+;; Version: 0.1
 
 ;; This file is not part of GNU Emacs.
 
