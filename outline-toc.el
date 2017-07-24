@@ -149,7 +149,7 @@ when you enter a buffer which is not derived from
 ;;; Internal variables
 
 (defvar outline-toc--active-buffer nil
-  "The buffer currently displayed in the outline-toc")
+  "The buffer currently displayed in the outline-toc.")
 
 ;; Window start/end from the base buffer
 (defvar outline-toc--start nil)
@@ -188,6 +188,7 @@ when you enter a buffer which is not derived from
     (kill-buffer outline-toc--buffer-name)))
 
 (defun outline-toc-create-window ()
+  "Create TOC sidebare window."
   (let ((width (round (* (window-width)
                          outline-toc-width-fraction))))
     (when (< width outline-toc-minimum-width)
@@ -347,7 +348,7 @@ When FORCE, enforce update of the active region."
 ;;; Outline-Toc minor mode
 
 (defvar outline-toc-sb-mode-map (make-sparse-keymap)
-  "Keymap used by `outline-toc-sb-mode'.")
+  "Keymap used by function `outline-toc-sb-mode'.")
 
 (define-minor-mode outline-toc-sb-mode
   "Minor mode for outline-toc sidebar."
