@@ -18,3 +18,5 @@ Right now this probably only works with `markdown-mode` files. Open up a
 markdown file and run `outline-toc-mode`. This should open up a new window with
 a table of contents for your file. As you move around in the source buffer, the
 TOC should highlight the section you're in.
+
+![Screencast](outline-toc.gif)
