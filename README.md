@@ -7,6 +7,11 @@ This TOC will show the sections in the document, highlighting the one that
 you're editing in the master document. The whole idea is to give you context as
 you're editing a large document (e.g. a markdown file or something).
 
+Here's an example showing `outline-toc-mode` while editing the markdown source
+for a chapter in one of my books:
+
+![Screencast](outline-toc.gif)
+
 ## Current status
 
 outline-toc works in a rough sense. You can open up the TOC and it'll stay
@@ -34,5 +39,3 @@ someone has a re-usable library for this functionality I'd be eager to try it.
 Open up a supported file and run `outline-toc-mode`. This should open up a new
 window with a table of contents for your file. As you move around in the source
 buffer, the TOC should highlight the section you're in.
-
-![Screencast](outline-toc.gif)
