@@ -49,11 +49,10 @@
 ;;; Code:
 
 (defgroup outline-toc nil
-  "A outline-toc sidebar for Emacs."
+  "A outline-toc sidebar."
   :group 'convenience)
 
-(defface outline-toc-font-face
-  '((default :family "DejaVu Sans Mono" :height 110))
+(defface outline-toc-font-face nil
   "Face used for text in outline-toc buffer, notably the font family and height.
 This height should be really small.  You probably want to use a
 TrueType font for this.  After changing this, you should
@@ -61,7 +60,7 @@ recreate the outline-toc to avoid problems with recentering."
   :group 'outline-toc)
 
 (defface outline-toc-current-section
-  '((t (:background "yellow" :foreground "black")))
+  '((t (:inherit highlight)))
   "Face for the current line in the TOC."
   :group 'outline-toc)
 
@@ -83,12 +82,12 @@ Can be either the symbol `left' or `right'."
                  (const :tag "Right" right))
   :group 'outline-toc)
 
-(defcustom outline-toc--buffer-name " *OUTLINE-TOC*"
+(defcustom outline-toc-buffer-name " *OUTLINE-TOC*"
   "Buffer name of outline-toc sidebar."
   :type 'string
   :group 'outline-toc)
 
-(defcustom outline-toc--update-delay 0.1
+(defcustom outline-toc-update-delay 0.1
   "Delay in seconds after which sidebar gets updated.
 Setting this to 0 will let the outline-toc react immediately, but
 this will slow down scrolling."
@@ -100,7 +99,7 @@ this will slow down scrolling."
            (cancel-timer outline-toc--timer-object)
            (setq outline-toc--timer-object
                  (run-with-idle-timer
-                  outline-toc--update-delay t 'outline-toc--update))))
+                  outline-toc-update-delay t 'outline-toc--update))))
   :group 'outline-toc)
 
 (defcustom outline-toc-hide-scroll-bar t
@@ -173,19 +172,19 @@ when you enter a buffer which is not derived from
 (defun outline-toc-active-current-buffer-p ()
   "Whether the current buffer is displayed in the outline-toc."
   (and (eq (current-buffer) outline-toc--active-buffer)
-       (get-buffer outline-toc--buffer-name)
-       (with-current-buffer outline-toc--buffer-name
+       (get-buffer outline-toc-buffer-name)
+       (with-current-buffer outline-toc-buffer-name
          (eq outline-toc--active-buffer (buffer-base-buffer)))))
 
 (defsubst outline-toc--get-window ()
   "Get current outline-toc window."
-  (when (get-buffer outline-toc--buffer-name)
-    (get-buffer-window outline-toc--buffer-name)))
+  (when (get-buffer outline-toc-buffer-name)
+    (get-buffer-window outline-toc-buffer-name)))
 
 (defsubst outline-toc-kill-buffer ()
   "Kill the outline-toc buffer."
-  (when (get-buffer outline-toc--buffer-name)
-    (kill-buffer outline-toc--buffer-name)))
+  (when (get-buffer outline-toc-buffer-name)
+    (kill-buffer outline-toc-buffer-name)))
 
 (defun outline-toc-create-window ()
   "Create TOC sidebare window."
@@ -208,7 +207,7 @@ when you enter a buffer which is not derived from
       (set-window-fringes nil 0 0))
     ;; Switch to buffer.
     (switch-to-buffer
-     (get-buffer-create outline-toc--buffer-name) t t)
+     (get-buffer-create outline-toc-buffer-name) t t)
     ;; Do not fold lines in the outline-toc.
     (setq truncate-lines t)
     ;; Make it dedicated.
@@ -225,7 +224,7 @@ when you enter a buffer which is not derived from
   "Toggle outline-toc mode."
   :global t
   :group 'outline-toc
-  :lighter "OToc"
+  :lighter " OToc"
   (if outline-toc-mode
       (progn
         (when (and outline-toc-major-modes
@@ -236,7 +235,7 @@ when you enter a buffer which is not derived from
           (outline-toc-new-outline-toc))
         ;; Create timer.
         (setq outline-toc--timer-object
-              (run-with-idle-timer outline-toc--update-delay t 'outline-toc--update)))
+              (run-with-idle-timer outline-toc-update-delay t 'outline-toc--update)))
     ;; Turn it off
     (outline-toc-kill)
     (outline-toc-setup-hooks t)))
@@ -254,7 +253,7 @@ Re-use already existing outline-toc window if possible."
         (maj-mode major-mode)
         (win (outline-toc--get-window))
         (indbuf (make-indirect-buffer (current-buffer)
-                                      (concat outline-toc--buffer-name "_temp")))
+                                      (concat outline-toc-buffer-name "_temp")))
         (edges (window-pixel-edges)))
 
     ;; Remember the active buffer currently displayed in the outline-toc.
@@ -266,7 +265,7 @@ Re-use already existing outline-toc window if possible."
         (set-window-dedicated-p nil nil))
       (switch-to-buffer indbuf t t)
       (outline-toc-kill-buffer)
-      (rename-buffer outline-toc--buffer-name)
+      (rename-buffer outline-toc-buffer-name)
 
       ;; Do not fold lines in the outline-toc.
       ;; (setq truncate-lines t)
