@@ -49,6 +49,8 @@
 
 ;;; Code:
 
+(require 'outline)
+
 (defgroup outline-toc nil
   "A outline-toc sidebar."
   :group 'convenience)
